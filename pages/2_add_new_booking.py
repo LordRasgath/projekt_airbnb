@@ -1,2 +1,2 @@
 import streamlit as st
-st.write("looool")
+st.title("Add a Person")
