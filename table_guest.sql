@@ -15,7 +15,7 @@ CREATE TABLE guests (
     email TINYTEXT,
     age INT,
     comments VARCHAR (3000),
-    candiate_last_minute BOOL,
+    candiate_lastminute BOOL,
     bed_config TINYTEXT,
     PRIMARY KEY (person_ID)
 

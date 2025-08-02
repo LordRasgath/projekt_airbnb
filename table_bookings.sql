@@ -1,5 +1,5 @@
 CREATE TABLE bookings(
-    booking_number TINYTEXT NOT NULL,
+    booking_number CHAR(10) NOT NULL,
     number_guests INT,
     adults INT,
     kids INT,
@@ -9,14 +9,17 @@ CREATE TABLE bookings(
     check_out DATE,
     number_of_nights INT,
     booking_date DATE,
-    ppn_avg_w/discount FLOAT(24),
+    ppn_avg_discount FLOAT(24),
     cleaning_fee FLOAT(24),
     service_fee FLOAT(24),
     total_paid FLOAT(24),
-    total_nights_w/o_discount FLOAT(24),
+    total_nights_no_discount FLOAT(24),
     total_discount FLOAT(24),
     service_fee_renter FLOAT(24),
+    total_received FLOAT(24),
+    cancelled BOOL,
+    date_of_cancel DATE,
     guest INT,
-    PRIMARY KEY(booking_number)
+    PRIMARY KEY(booking_number),
     FOREIGN KEY (guest) REFERENCES guests(person_ID)
-)
+);
