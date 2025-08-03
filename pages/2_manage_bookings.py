@@ -119,7 +119,7 @@ with col9:
     total_received=st.number_input("Total received (mandatory)",min_value=0.00,format="%0.01f",key="total_received")
 
 col10, col11, col12 = st.columns(3)
-def addBooking():
+def addBooking():   #references booking to the last person pushed to database
     db=connect()
     cursor=db.cursor()
     cursor.execute("SELECT MAX(person_id) FROM guests")
