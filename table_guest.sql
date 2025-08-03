@@ -4,7 +4,7 @@ CREATE TABLE guests (
     guest_surname TINYTEXT NOT NULL,
     rating DEC(1,1),
     cleanliness DEC(1,1),
-    houseroules DEC(1,1),
+    houserules DEC(1,1),
     communication DEC(1,1),
     number_of_travels INT,
     number_of_ratings INT,
@@ -16,7 +16,7 @@ CREATE TABLE guests (
     email TINYTEXT,
     age TINYTEXT,
     comments VARCHAR (3000),
-    candiate_lastminute BOOL,
+    candidate_lastminute BOOL,
     bed_config TINYTEXT,
     PRIMARY KEY (person_ID)
 );
