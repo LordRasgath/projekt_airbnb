@@ -6,9 +6,9 @@ homepage=st.Page(
     url_path="homepage"
 )
 newbooking = st.Page(
-    "pages/2_add_new_booking.py",
-    title="Add a new Booking",
-    url_path="new_booking")
+    "pages/2_manage_bookings.py",
+    title="Manage Bookings",
+    url_path="manage_bookings")
 visualize=st.Page(
     "pages/3_Visualize.py",
     url_path="visualize"
