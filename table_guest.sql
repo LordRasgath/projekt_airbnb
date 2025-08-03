@@ -1,6 +1,7 @@
 CREATE TABLE guests (
     person_ID INT NOT NULL AUTO_INCREMENT,
-    guest_name TINYTEXT NOT NULL,
+    guest_given_name TINYTEXT NOT NULL,
+    guest_surname TINYTEXT NOT NULL,
     rating DEC(1,1),
     cleanliness DEC(1,1),
     houseroules DEC(1,1),
@@ -13,7 +14,7 @@ CREATE TABLE guests (
     nationality TINYTEXT,
     job TINYTEXT,
     email TINYTEXT,
-    age INT,
+    age TINYTEXT,
     comments VARCHAR (3000),
     candiate_lastminute BOOL,
     bed_config TINYTEXT,
