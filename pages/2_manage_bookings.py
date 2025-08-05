@@ -1,13 +1,15 @@
 import os
 import sys
-
+import re
+import pdfplumber as plumber
 import streamlit as st
 
 sys.path.append(
     os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))  # ability for Python to import from a parent folder
 import datetime
 from sql_connection import connect  # importing the database connector
-tab1, tab2=st.tabs(["Manually add a new Booking","Import Data from PDF"])
+
+tab1, tab2 = st.tabs(["Manually add a new Booking", "Import Data from PDF"])
 with tab1:
     st.title("Add a Person")
     currentDateTime = datetime.datetime.now()
@@ -16,40 +18,49 @@ with tab1:
         range(2008, year + 1))  # for AirBNB Member since: Ability to select the Year from 2008 until the current
     list_countries = list(
         ['', 'Afghanistan', 'Aland Islands', 'Albania', 'Algeria', 'American Samoa', 'Andorra', 'Angola', 'Anguilla',
-        'Antarctica', 'Antigua and Barbuda', 'Argentina', 'Armenia', 'Aruba', 'Australia', 'Austria', 'Azerbaijan',
-        'Bahamas', 'Bahrain', 'Bangladesh', 'Barbados', 'Belarus', 'Belgium', 'Belize', 'Benin', 'Bermuda', 'Bhutan',
-        'Bolivia,', 'Bonaire, Sint Eustatius and Saba', 'Bosnia and Herzegovina', 'Botswana', 'Bouvet Island', 'Brazil',
-        'British Indian Ocean Territory', 'Brunei Darussalam', 'Bulgaria', 'Burkina Faso', 'Burundi', 'Cambodia',
-        'Cameroon', 'Canada', 'Cape Verde', 'Cayman Islands', 'Central African Republic', 'Chad', 'Chile', 'China',
-        'Christmas Island', 'Cocos (Keeling) Islands', 'Colombia', 'Comoros', 'Congo',
-        'Congo, The Democratic Republic of the', 'Cook Islands', 'Costa Rica', "Côte d'Ivoire", 'Croatia', 'Cuba',
-        'Curaçao', 'Cyprus', 'Czech Republic', 'Denmark', 'Djibouti', 'Dominica', 'Dominican Republic', 'Ecuador', 'Egypt',
-        'El Salvador', 'Equatorial Guinea', 'Eritrea', 'Estonia', 'Ethiopia', 'Falkland Islands', 'Faroe Islands', 'Fiji',
-        'Finland', 'France', 'French Guiana', 'French Polynesia', 'French Southern Territories', 'Gabon', 'Gambia',
-        'Georgia', 'Germany', 'Ghana', 'Gibraltar', 'Greece', 'Greenland', 'Grenada', 'Guadeloupe', 'Guam', 'Guatemala',
-        'Guernsey', 'Guinea', 'Guinea-Bissau', 'Guyana', 'Haiti', 'Heard Island and McDonald Islands',
-        'Holy See (Vatican City State)', 'Honduras', 'Hong Kong', 'Hungary', 'Iceland', 'India', 'Indonesia', 'Iran',
-        'Iraq', 'Ireland', 'Isle of Man', 'Israel', 'Italy', 'Jamaica', 'Japan', 'Jersey', 'Jordan', 'Kazakhstan', 'Kenya',
-        'Kiribati', 'Korea, South', "Kosovo", 'Kuwait', 'Kyrgyzstan', "Lao People's Democratic Republic", 'Latvia',
-        'Lebanon', 'Lesotho', 'Liberia', 'Libya', 'Liechtenstein', 'Lithuania', 'Luxembourg', 'Macao', 'North Macedonia',
-        'Madagascar', 'Malawi', 'Malaysia', 'Maldives', 'Mali', 'Malta', 'Marshall Islands', 'Martinique', 'Mauritania',
-        'Mauritius', 'Mayotte', 'Mexico', 'Micronesia, Federated States of', 'Moldova, Republic of', 'Monaco', 'Mongolia',
-        'Montenegro', 'Montserrat', 'Morocco', 'Mozambique', 'Myanmar', 'Namibia', 'Nauru', 'Nepal', 'Netherlands',
-        'New Caledonia', 'New Zealand', 'Nicaragua', 'Niger', 'Nigeria', 'Niue', 'Norfolk Island',
-        'Northern Mariana Islands', 'Norway', 'Oman', 'Pakistan', 'Palau', 'Palestinian Territory, Occupied', 'Panama',
-        'Papua New Guinea', 'Paraguay', 'Peru', 'Philippines', 'Pitcairn', 'Poland', 'Portugal', 'Puerto Rico', 'Qatar',
-        'Réunion', 'Romania', 'Russian Federation', 'Rwanda', 'Saint Barthélemy',
-        'Saint Helena, Ascension and Tristan da Cunha', 'Saint Kitts and Nevis', 'Saint Lucia',
-        'Saint Martin (French part)', 'Saint Pierre and Miquelon', 'Saint Vincent and the Grenadines', 'Samoa',
-        'San Marino', 'Sao Tome and Principe', 'Saudi Arabia', 'Senegal', 'Serbia', 'Seychelles', 'Sierra Leone',
-        'Singapore', 'Sint Maarten (Dutch part)', 'Slovakia', 'Slovenia', 'Solomon Islands', 'Somalia', 'South Africa',
-        'South Georgia and the South Sandwich Islands', 'Spain', 'Sri Lanka', 'Sudan', 'Suriname', 'South Sudan',
-        'Svalbard and Jan Mayen', 'Swaziland', 'Sweden', 'Switzerland', 'Syrian Arab Republic',
-        'Taiwan, Province of China', 'Tajikistan', 'Tanzania, United Republic of', 'Thailand', 'Timor-Leste', 'Togo',
-        'Tokelau', 'Tonga', 'Trinidad and Tobago', 'Tunisia', 'Turkey', 'Turkmenistan', 'Turks and Caicos Islands',
-        'Tuvalu', 'Uganda', 'Ukraine', 'United Arab Emirates', 'United Kingdom', 'United States',
-        'United States Minor Outlying Islands', 'Uruguay', 'Uzbekistan', 'Vanuatu', 'Venezuela', 'Viet Nam',
-        'British Virgin Islands', 'Virgin Islands, U.S.', 'Wallis and Futuna', 'Yemen', 'Zambia', 'Zimbabwe'])
+         'Antarctica', 'Antigua and Barbuda', 'Argentina', 'Armenia', 'Aruba', 'Australia', 'Austria', 'Azerbaijan',
+         'Bahamas', 'Bahrain', 'Bangladesh', 'Barbados', 'Belarus', 'Belgium', 'Belize', 'Benin', 'Bermuda', 'Bhutan',
+         'Bolivia,', 'Bonaire, Sint Eustatius and Saba', 'Bosnia and Herzegovina', 'Botswana', 'Bouvet Island',
+         'Brazil',
+         'British Indian Ocean Territory', 'Brunei Darussalam', 'Bulgaria', 'Burkina Faso', 'Burundi', 'Cambodia',
+         'Cameroon', 'Canada', 'Cape Verde', 'Cayman Islands', 'Central African Republic', 'Chad', 'Chile', 'China',
+         'Christmas Island', 'Cocos (Keeling) Islands', 'Colombia', 'Comoros', 'Congo',
+         'Congo, The Democratic Republic of the', 'Cook Islands', 'Costa Rica', "Côte d'Ivoire", 'Croatia', 'Cuba',
+         'Curaçao', 'Cyprus', 'Czech Republic', 'Denmark', 'Djibouti', 'Dominica', 'Dominican Republic', 'Ecuador',
+         'Egypt',
+         'El Salvador', 'Equatorial Guinea', 'Eritrea', 'Estonia', 'Ethiopia', 'Falkland Islands', 'Faroe Islands',
+         'Fiji',
+         'Finland', 'France', 'French Guiana', 'French Polynesia', 'French Southern Territories', 'Gabon', 'Gambia',
+         'Georgia', 'Germany', 'Ghana', 'Gibraltar', 'Greece', 'Greenland', 'Grenada', 'Guadeloupe', 'Guam',
+         'Guatemala',
+         'Guernsey', 'Guinea', 'Guinea-Bissau', 'Guyana', 'Haiti', 'Heard Island and McDonald Islands',
+         'Holy See (Vatican City State)', 'Honduras', 'Hong Kong', 'Hungary', 'Iceland', 'India', 'Indonesia', 'Iran',
+         'Iraq', 'Ireland', 'Isle of Man', 'Israel', 'Italy', 'Jamaica', 'Japan', 'Jersey', 'Jordan', 'Kazakhstan',
+         'Kenya',
+         'Kiribati', 'Korea, South', "Kosovo", 'Kuwait', 'Kyrgyzstan', "Lao People's Democratic Republic", 'Latvia',
+         'Lebanon', 'Lesotho', 'Liberia', 'Libya', 'Liechtenstein', 'Lithuania', 'Luxembourg', 'Macao',
+         'North Macedonia',
+         'Madagascar', 'Malawi', 'Malaysia', 'Maldives', 'Mali', 'Malta', 'Marshall Islands', 'Martinique',
+         'Mauritania',
+         'Mauritius', 'Mayotte', 'Mexico', 'Micronesia, Federated States of', 'Moldova, Republic of', 'Monaco',
+         'Mongolia',
+         'Montenegro', 'Montserrat', 'Morocco', 'Mozambique', 'Myanmar', 'Namibia', 'Nauru', 'Nepal', 'Netherlands',
+         'New Caledonia', 'New Zealand', 'Nicaragua', 'Niger', 'Nigeria', 'Niue', 'Norfolk Island',
+         'Northern Mariana Islands', 'Norway', 'Oman', 'Pakistan', 'Palau', 'Palestinian Territory, Occupied', 'Panama',
+         'Papua New Guinea', 'Paraguay', 'Peru', 'Philippines', 'Pitcairn', 'Poland', 'Portugal', 'Puerto Rico',
+         'Qatar',
+         'Réunion', 'Romania', 'Russian Federation', 'Rwanda', 'Saint Barthélemy',
+         'Saint Helena, Ascension and Tristan da Cunha', 'Saint Kitts and Nevis', 'Saint Lucia',
+         'Saint Martin (French part)', 'Saint Pierre and Miquelon', 'Saint Vincent and the Grenadines', 'Samoa',
+         'San Marino', 'Sao Tome and Principe', 'Saudi Arabia', 'Senegal', 'Serbia', 'Seychelles', 'Sierra Leone',
+         'Singapore', 'Sint Maarten (Dutch part)', 'Slovakia', 'Slovenia', 'Solomon Islands', 'Somalia', 'South Africa',
+         'South Georgia and the South Sandwich Islands', 'Spain', 'Sri Lanka', 'Sudan', 'Suriname', 'South Sudan',
+         'Svalbard and Jan Mayen', 'Swaziland', 'Sweden', 'Switzerland', 'Syrian Arab Republic',
+         'Taiwan, Province of China', 'Tajikistan', 'Tanzania, United Republic of', 'Thailand', 'Timor-Leste', 'Togo',
+         'Tokelau', 'Tonga', 'Trinidad and Tobago', 'Tunisia', 'Turkey', 'Turkmenistan', 'Turks and Caicos Islands',
+         'Tuvalu', 'Uganda', 'Ukraine', 'United Arab Emirates', 'United Kingdom', 'United States',
+         'United States Minor Outlying Islands', 'Uruguay', 'Uzbekistan', 'Vanuatu', 'Venezuela', 'Viet Nam',
+         'British Virgin Islands', 'Virgin Islands, U.S.', 'Wallis and Futuna', 'Yemen', 'Zambia', 'Zimbabwe'])
     col1, col2, col3 = st.columns(3, border=True)
     with col1:
         given_name = st.text_input("Given name (mandatory)", key="given_name", max_chars=255)
@@ -63,13 +74,14 @@ with tab1:
     with col2:
         surname = st.text_input("Surname", key="surname", max_chars=255)
         total_rating = st.number_input("Total Rating", key="total_rating", value=0.0, min_value=0.0, max_value=5.0,
-                                    format="%0.1f", step=0.1)
-        communication = st.number_input("Communication", key="communication", value=0.0, min_value=0.0, max_value=5.0,
                                        format="%0.1f", step=0.1)
+        communication = st.number_input("Communication", key="communication", value=0.0, min_value=0.0, max_value=5.0,
+                                        format="%0.1f", step=0.1)
         member_since = st.selectbox("AirBNB Member since", list_years, key="member_since")
         nationality = st.selectbox("Nationality", list_countries, key="nationality")
         phone = st.text_input("Phone Number", key="phone", max_chars=255)
-        candidate_lastminute = st.checkbox("Candidate for last minute offering", key="candidate_lastminute", value=False)
+        candidate_lastminute = st.checkbox("Candidate for last minute offering", key="candidate_lastminute",
+                                           value=False)
 
     with col3:
         cleanliness = st.number_input("Cleanliness", key="cleanliness", value=0.0, min_value=0.0, max_value=5.0,
@@ -87,24 +99,24 @@ with tab1:
         cursor.execute(
             "INSERT INTO guests(guest_given_name, guest_surname, rating, cleanliness, houserules, communication, number_of_travels, number_of_ratings, airbnb_member_since, country_of_residence, city_of_residence, nationality, job, email, age, comments, candidate_lastminute, bed_config) VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)",
             (
-            given_name.lower(),
-            surname.lower(),
-            total_rating,
-            cleanliness,
-            houserules,
-            communication,
-            number_travels,
-            number_ratings,
-            member_since,
-            country.lower(),
-            city_residence.lower(),
-            nationality.lower(),
-            job.lower(),
-            email.lower(),
-            age.lower(),
-            comments.lower(),
-            candidate_lastminute,
-            bed_config.lower()
+                given_name.lower(),
+                surname.lower(),
+                total_rating,
+                cleanliness,
+                houserules,
+                communication,
+                number_travels,
+                number_ratings,
+                member_since,
+                country.lower(),
+                city_residence.lower(),
+                nationality.lower(),
+                job.lower(),
+                email.lower(),
+                age.lower(),
+                comments.lower(),
+                candidate_lastminute,
+                bed_config.lower()
             )
         )
         db.commit()
@@ -153,14 +165,14 @@ with tab1:
         check_in = st.date_input("Check In Date (mandatory)", key="check_in")
         booking_date = st.date_input("Booking Date (mandatory)", key="booking_date")
         service_fee_guests = st.number_input("Service fee for guests (mandatory)", min_value=0.00, format="%0.01f",
-                                          key="service_fee_guests")
+                                             key="service_fee_guests")
         total_discount = st.number_input("Total Discount", min_value=0.00, format="%0.01f", key="total_discount")
     with col8:
         number_guests = st.number_input("Number of guests (mandatory)", key="number_guests", min_value=0)
         babies = st.number_input("Number of babies", key="babies", min_value=0)
         check_out = st.date_input("Check Out Date (mandatory)", key="check_out")
         avg_ppn_incl_discount = st.number_input("Average Price per night, incl. discount (mandatory)", min_value=0.00,
-                                            format="%0.01f", key="avg_ppn_incl_discount")
+                                                format="%0.01f", key="avg_ppn_incl_discount")
         total_paid = st.number_input("Total price paid (mandatory)", min_value=0.00, format="%0.01f", key="total_paid")
         service_fee_landlord = st.number_input("Service fee for landlord (mandatory)", min_value=0.00, format="%0.01f",
                                                key="service_fee_landlord")
@@ -185,34 +197,34 @@ with tab1:
         cursor.execute(
             "INSERT INTO bookings(booking_number,number_guests, adults, kids, babies, pets, check_in, check_out, number_of_nights, booking_date, avg_ppn_incl_discount, cleaning_fee, service_fee_guest, total_paid, total_nights_excl_discount, total_discount, service_fee_landlord, total_received,guest) VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)",
             (
-            booking_number,
-            number_guests,
-            adults,
-            kids,
-            babies,
-            pets,
-            check_in,
-            check_out,
-            number_of_nights,
-            booking_date,
-            avg_ppn_incl_discount,
-            cleaning_fee,
-            service_fee_guests,
-            total_paid,
-            total_nights_excl_discount,
-            total_discount,
-            service_fee_landlord,
-            total_received,
-            latest_person_id,
+                booking_number,
+                number_guests,
+                adults,
+                kids,
+                babies,
+                pets,
+                check_in,
+                check_out,
+                number_of_nights,
+                booking_date,
+                avg_ppn_incl_discount,
+                cleaning_fee,
+                service_fee_guests,
+                total_paid,
+                total_nights_excl_discount,
+                total_discount,
+                service_fee_landlord,
+                total_received,
+                latest_person_id,
 
-        )
+            )
         )
         db.commit()
 
 
     def resetBooking():
         st.session_state.booking_number = ""
-        st. session_state.check_in = datetime.date.today()
+        st.session_state.check_in = datetime.date.today()
         st.session_state.check_out = datetime.date.today()
         st.session_state.number_guests = 0
         st.session_state.kids = 0
@@ -242,4 +254,11 @@ with tab1:
         st.button("Add a new Booking to the Database", on_click=addAndResetBooking)
 
     st.divider()
-
+with tab2:
+    uploaded_pdf = st.file_uploader("Upload PDF",type="pdf")
+if uploaded_pdf is not None:
+    with plumber.open(uploaded_pdf) as pdf:
+        all_text=""
+        for page in pdf.pages:
+            all_text += page.extract_text() + "\n"
+        st.text_area("Extrahierter Text", all_text, height=300)
