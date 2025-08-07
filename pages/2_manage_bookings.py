@@ -298,55 +298,55 @@ if uploaded_pdf is not None:
         if booking_date_match:
             booking_date_str = booking_date_match.group(1)
             booking_date = datetime.datetime.strptime(booking_date_str, "%a, %b %d, %Y").date()
-            st.write("Booking Date:", booking_date)
+
 
         checkin_match = re.search(r"Check-in\s*\n?\s*([A-Za-z]{3},\s+[A-Za-z]{3,9}\s+\d{1,2},\s+\d{4})", all_text)
         if checkin_match:
             checkin_str = checkin_match.group(1)
             check_in = datetime.datetime.strptime(checkin_str, "%a, %b %d, %Y").date()
-            st.write("Check-in:", check_in)
+
 
         checkout_match = re.search(r"Checkout\s*\n?\s*([A-Za-z]{3},\s+[A-Za-z]{3,9}\s+\d{1,2},\s+\d{4})", all_text)
         if checkout_match:
             checkout_str = checkout_match.group(1)
             check_out = datetime.datetime.strptime(checkout_str, "%a, %b %d, %Y").date()
-            st.write("Checkout:", check_out)
+
 
         guest_match = re.search(r"(\d+)\s+adults?,\s*(\d+)\s+(?:child|children|kids?)", all_text, re.IGNORECASE)
         if guest_match:
             adults = int(guest_match.group(1))
             kids = int(guest_match.group(2))
-            st.write(f"Guests: {adults} Adults, {kids} Kids")
+
 
         number_match = re.search(r"Confirmation code\s*\n?\s*([A-Za-z0-9]{10})", all_text)
         if number_match:
             booking_number = number_match.group(1)
-            st.write("Booking Number:", booking_number)
+
 
         guests_match = re.search(r"(\d+)\s+guests", all_text, re.IGNORECASE)
         number_guests = int(guests_match.group(1)) if guests_match else None
-        st.write(f"Number of guests: {number_guests}")
+
 
         nights_match = re.search(r"\(\s*(\d+)\s+nights?\s*\)", all_text, re.IGNORECASE)
         number_of_nights = int(nights_match.group(1)) if nights_match else None
-        st.write(f"Number of nights: {number_of_nights}")
+
 
         avg_ppn_match = re.search(r"Guest paid\s*\$\s*([\d,.]+)\s*x\s*\d+\s*nights", all_text, re.IGNORECASE)
         avg_ppn_incl_discount = float(avg_ppn_match.group(1).replace(",", "")) if avg_ppn_match else None
-        st.write(f"Avg price per night incl. discount: {avg_ppn_incl_discount}")
+
 
         cleaning_fee_match = re.search(r"Cleaning fee \$([\d,.]+)", all_text, re.IGNORECASE)
         cleaning_fee = float(cleaning_fee_match.group(1).replace(",", "")) if cleaning_fee_match else 0.0
-        st.write(f"Cleaning fee: {cleaning_fee}")
+
 
         service_fee_guests_match = re.search(r"Guest service fee \$([\d,.]+)", all_text, re.IGNORECASE)
         service_fee_guests = float(
             service_fee_guests_match.group(1).replace(",", "")) if service_fee_guests_match else 0.0
-        st.write(f"Service fee guests: {service_fee_guests}")
+
 
         total_paid_match = re.search(r"Total \(USD\) \$([\d,.]+)", all_text, re.IGNORECASE)
         total_paid = float(total_paid_match.group(1).replace(",", "")) if total_paid_match else 0.0
-        st.write(f"Total paid: {total_paid}")
+
 
         match = re.search(r"\w{3}, \d{2}/\d{2} \$([\d,.]+)", all_text)
         if match:
@@ -354,16 +354,16 @@ if uploaded_pdf is not None:
         else:
             total_nights_excl_discount = None
 
-        st.write("Total per night excluding discount:", total_nights_excl_discount)
+
 
         total_discount_match = re.search(r"Nightly rate adjustment\s*[−-]\$([\d,.]+)", all_text, re.IGNORECASE)
         total_discount = float(total_discount_match.group(1).replace(",", "")) if total_discount_match else 0.0
-        st.write(f"Total discount: {total_discount}")
+
 
         service_fee_landlord_match = re.search(r"Host service fee.*[−-]\$([\d,.]+)", all_text, re.IGNORECASE)
         service_fee_landlord = float(
             service_fee_landlord_match.group(1).replace(",", "")) if service_fee_landlord_match else 0.0
-        st.write(f"Service fee landlord: {service_fee_landlord}")
+
 
         lines = all_text.splitlines()
 
@@ -375,9 +375,7 @@ if uploaded_pdf is not None:
             given_name = name_parts[0]
             surname = " ".join(name_parts[1:])
 
-            st.write("Given name:", given_name)
-            st.write("Surname:", surname)
-
+        col1, col2, col3 = st.columns(3)
         rating_match = re.search(r"([0-9.]+)\s+rating", all_text)
         rating = rating_match.group(1) if rating_match else ""
         member_since_match = re.search(r"Airbnb in (\d{4})", all_text)
@@ -385,13 +383,44 @@ if uploaded_pdf is not None:
         location_line_match = re.search(r"Lives in (.+),\s*(.+)", all_text)
         city_of_residence = location_line_match.group(1).strip()
         country_of_residence = location_line_match.group(2).strip()
+
         st.write("Rating:", rating)
         st.write("Airbnb Member Since:", airbnb_member_since)
         st.write("City of residence:", city_of_residence)
         st.write("Country of residence:", country_of_residence)
 
 
-    col1, col2 ,col3= st.columns(3)
+        st.write(f"Service fee landlord: {service_fee_landlord}")
+        st.write(f"Total paid: {total_paid}")
+
+
+
+
+
+
+
+
+
+
+        st.write("Total per night excluding discount:", total_nights_excl_discount)
+        st.write(f"Total discount: {total_discount}")
+
+    with col1:
+        st.write("Given name:", given_name)
+        st.write("Checkout:", check_out)
+        st.write(f"Guests: {adults} Adults, {kids} Kids")
+        st.write(f"Avg price per night incl. discount: {avg_ppn_incl_discount}")
+
+    with col2:
+        st.write("Surname:", surname)
+        st.write("Booking Date:", booking_date)
+        st.write(f"Number of nights: {number_of_nights}")
+        st.write(f"Cleaning fee: {cleaning_fee}")
     with col3:
+        st.write("Check-in:", check_in)
+        st.write(f"Number of guests: {number_guests}")
+        st.write("Booking Number:", booking_number)
+        st.write(f"Service fee guests: {service_fee_guests}")
+
         if st.button("Submit"):
             addBooking()
