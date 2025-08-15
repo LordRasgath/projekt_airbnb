@@ -18,6 +18,5 @@ CREATE TABLE guests (
     phone TINYTEXT,
     comments VARCHAR (3000),
     candidate_lastminute BOOL,
-    bed_config TINYTEXT,
     PRIMARY KEY (person_ID)
 );

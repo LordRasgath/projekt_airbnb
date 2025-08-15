@@ -4,6 +4,7 @@ import sys
 
 import pdfplumber as plumber
 import streamlit as st
+from streamlit import file_uploader
 
 sys.path.append(
     os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))  # ability for Python to import from a parent folder
@@ -70,7 +71,6 @@ with tab1:
         number_ratings = st.number_input("Total number of ratings", key="number_ratings", min_value=0)
         city_residence = st.text_input("City of residence", key="city_residence", max_chars=255)
         email = st.text_input("Email", key="email", max_chars=255)
-        bed_config = st.text_input("Bed Configuration", key="bed_config", max_chars=255)
 
     with col2:
         surname = st.text_input("Surname", key="surname", max_chars=255)
@@ -98,7 +98,7 @@ with tab1:
         db = connect()
         cursor = db.cursor()
         cursor.execute(
-            "INSERT INTO guests(guest_given_name, guest_surname, rating, cleanliness, houserules, communication, number_of_travels, number_of_ratings, airbnb_member_since, country_of_residence, city_of_residence, nationality, job, email, age, comments, candidate_lastminute, bed_config) VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)",
+            "INSERT INTO guests(guest_given_name, guest_surname, rating, cleanliness, houserules, communication, number_of_travels, number_of_ratings, airbnb_member_since, country_of_residence, city_of_residence, nationality, job, email, age, comments, candidate_lastminute) VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)",
             (
                 given_name.lower(),
                 surname.lower(),
@@ -117,7 +117,6 @@ with tab1:
                 age.lower(),
                 comments.lower(),
                 candidate_lastminute,
-                bed_config.lower()
             )
         )
         db.commit()
@@ -138,7 +137,6 @@ with tab1:
         st.session_state.age = ""
         st.session_state.comments = ""
         st.session_state.candidate_lastminute = False
-        st.session_state.bed_config = ""
         st.session_state.nationality = ""
         st.session_state.member_since = 2008
         st.session_state.country_of_residence = ""
@@ -168,6 +166,7 @@ with tab1:
         service_fee_guests = st.number_input("Service fee for guests (mandatory)", min_value=0.00, format="%0.01f",
                                              key="service_fee_guests")
         total_discount = st.number_input("Total Discount", min_value=0.00, format="%0.01f", key="total_discount")
+        bed_config=st.text_input("Bed Configuration", key="bed_config", max_chars=255)
     with col8:
         number_guests = st.number_input("Number of guests (mandatory)", key="number_guests", min_value=0)
         babies = st.number_input("Number of babies", key="babies", min_value=0)
@@ -196,7 +195,7 @@ with tab1:
         cursor.execute("SELECT MAX(person_id) FROM guests")
         latest_person_id = cursor.fetchone()[0]
         cursor.execute(
-            "INSERT INTO bookings(booking_number,number_guests, adults, kids, babies, pets, check_in, check_out, number_of_nights, booking_date, avg_ppn_incl_discount, cleaning_fee, service_fee_guest, total_paid, total_nights_excl_discount, total_discount, service_fee_landlord, total_received,guest) VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)",
+            "INSERT INTO bookings(booking_number,number_guests, adults, kids, babies, pets, check_in, check_out, number_of_nights, booking_date, avg_ppn_incl_discount, cleaning_fee, service_fee_guest, total_paid, total_nights_excl_discount, total_discount, service_fee_landlord, total_received,bed_config,guest) VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)",
             (
                 booking_number,
                 number_guests,
@@ -216,6 +215,7 @@ with tab1:
                 total_discount,
                 service_fee_landlord,
                 total_received,
+                bed_config,
                 latest_person_id,
 
             )
@@ -242,6 +242,7 @@ with tab1:
         st.session_state.total_received = 0
         st.session_state.total_discount = 0
         st.session_state.service_fee_landlord = 0
+        st.session_state.bed_config = ""
 
 
     def addAndResetBooking():
@@ -286,7 +287,9 @@ with tab1:
 
 
     with tab2:
-        uploaded_pdf = st.file_uploader("Upload PDF", type="pdf")
+        if "upload_key" not in st.session_state:
+            st.session_state.upload_key = 0
+        uploaded_pdf = st.file_uploader("Upload PDF", type="pdf",key=f"uploader_{st.session_state.upload_key}")
         if uploaded_pdf is not None:
             with plumber.open(uploaded_pdf) as pdf:
                 all_text = ""
@@ -446,11 +449,12 @@ with tab1:
                 st.session_state.houserules_parsed=0.0
                 st.session_state.number_travels_parsed=0
                 st.session_state.age_parsed=""
-                st.session_state.candidate_lastminute_parsed==False
+                st.session_state.candidate_lastminute_parsed=False
                 st.session_state.communication_parsed=0.0
                 st.session_state.nationality_parsed=""
                 st.session_state.comments_parsed=""
                 st.session_state.email_parsed=""
+                st.session_state.upload_key += 1
 
 
             col7, col8, col9 = st.columns(3)
@@ -462,7 +466,7 @@ with tab1:
 
 
             with col4:
-                cleanliness=st.number_input("cleanliness", value=0.0, min_value=0.0, max_value=5.0, key="cleanliness_parsed",
+                cleanliness=st.number_input("cleanliness", min_value=0.0, max_value=5.0, key="cleanliness_parsed",
                                      format="%0.1f", step=0.1)
                 number_ratings = st.number_input("Total number of ratings", min_value=0, key="number_ratings_parsed",)
                 job = st.text_input("Job", max_chars=255, key="job_parsed")

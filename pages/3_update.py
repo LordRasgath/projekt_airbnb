@@ -58,7 +58,7 @@ def updateBooking():
     db = connect()
     cursor = db.cursor()
     cursor.execute(
-        "UPDATE bookings SET number_guests=%s,adults=%s,kids=%s,babies=%s,pets=%s,check_in=%s,check_out=%s,number_of_nights=%s,booking_date=%s,avg_ppn_incl_discount=%s,cleaning_fee=%s,service_fee_guest=%s,total_paid=%s,total_nights_excl_discount=%s,total_discount=%s,service_fee_landlord=%s,total_received=%s WHERE booking_number=%s",
+        "UPDATE bookings SET number_guests=%s,adults=%s,kids=%s,babies=%s,pets=%s,check_in=%s,check_out=%s,number_of_nights=%s,booking_date=%s,avg_ppn_incl_discount=%s,cleaning_fee=%s,service_fee_guest=%s,total_paid=%s,total_nights_excl_discount=%s,total_discount=%s,service_fee_landlord=%s,total_received=%s, bed_config=%s WHERE booking_number=%s",
         (
             st.session_state["number_guests"],
             st.session_state["adults"],
@@ -77,6 +77,7 @@ def updateBooking():
             st.session_state["total_discount"],
             st.session_state["service_fee_landlord"],
             st.session_state["total_received"],
+            st.session_state["bed_config"],
             st.session_state["booking_number"],))
     db.commit()
     del st.session_state["booking_data"]
@@ -86,7 +87,7 @@ def updateBooking():
 def updatePerson():
     db = connect()
     cursor = db.cursor()
-    cursor.execute("UPDATE guests SET rating=%s, cleanliness=%s, houserules=%s,communication=%s,number_of_travels=%s,number_of_ratings=%s,airbnb_member_since=%s,country_of_residence=%s,city_of_residence=%s,nationality=%s,job=%s,email=%s,age=%s,phone=%s,comments=%s,candidate_lastminute=%s,bed_config=%s WHERE guest_given_name=%s AND guest_surname=%s",(
+    cursor.execute("UPDATE guests SET rating=%s, cleanliness=%s, houserules=%s,communication=%s,number_of_travels=%s,number_of_ratings=%s,airbnb_member_since=%s,country_of_residence=%s,city_of_residence=%s,nationality=%s,job=%s,email=%s,age=%s,phone=%s,comments=%s,candidate_lastminute=%s WHERE guest_given_name=%s AND guest_surname=%s",(
         st.session_state["rating"],
         st.session_state["cleanliness"],
         st.session_state["houserules"],
@@ -103,7 +104,6 @@ def updatePerson():
         st.session_state["phone"],
         st.session_state["comments"],
         st.session_state["candidate_lastminute"],
-        st.session_state["bed_config"],
         st.session_state["given_name"].lower(),
         st.session_state["surname"].lower()))
     db.commit()
@@ -158,6 +158,7 @@ with tab1:
             st.session_state["booking_date"] = st.date_input("Booking Date", value=zeile["booking_date"])
             st.session_state["service_fee_guest"]=st.number_input("Service Fee for guests", value=zeile["service_fee_guest"],format="%.01f")
             st.session_state["total_discount"]=st.number_input("Total Discount", value=zeile["total_discount"],format="%.01f")
+            st.session_state["bed_config"]=st.text_input("Bed Config", value=zeile["bed_config"],max_chars=255)
 
             st.button("Update Booking",on_click=updateBooking)
 with tab2:
@@ -182,20 +183,19 @@ with tab2:
             st.session_state["communication"]=st.number_input("Communication", value=float(zeile_person["communication"]),format="%.1f")
             st.session_state["airbnb_member_since"]=st.selectbox("AirBnB Member since",list_years,index=list_years.index(zeile_person["airbnb_member_since"]))
             st.session_state["nationality"]=st.selectbox("Nationality",list_countries,index=list_countries.index(zeile_person["nationality"].capitalize()))
-            st.session_state["age"]=st.text_input("Approximate age", value=zeile_person["age"])
+            st.session_state["age"]=st.text_input("Approximate age", value=zeile_person["age"],max_chars=255)
             st.session_state["candidate_lastminute"]=st.checkbox("Candidate for last minute offering", value=zeile_person["candidate_lastminute"])
 
         with col2:
             st.session_state["cleanliness"]=st.number_input("Cleanliness", value=float(zeile_person["cleanliness"]),format="%.1f")
             st.session_state["number_of_travels"]=st.number_input("Number of travels", value=zeile_person["number_of_travels"])
             st.session_state["country_of_residence"]=st.selectbox("Country of Residence",list_countries,index=list_countries.index(zeile_person["country_of_residence"].capitalize()))
-            st.session_state["job"]=st.text_input("Job", value=zeile_person["job"].capitalize())
-            st.session_state["phone"]=st.text_input("Phone number", value=zeile_person["phone"])
+            st.session_state["job"]=st.text_input("Job", value=zeile_person["job"].capitalize(),max_chars=255)
+            st.session_state["phone"]=st.text_input("Phone number", value=zeile_person["phone"],max_chars=255)
             st.session_state["comments"]=st.text_area("Comments", value=zeile_person["comments"])
         with col3:
             st.session_state["houserules"]=st.number_input("Houserules", value=float(zeile_person["houserules"]),format="%.1f")
             st.session_state["number_of_ratings"]=st.number_input("Number of ratings", value=zeile_person["number_of_ratings"])
-            st.session_state["city_of_residence"]=st.text_input("City of residence", value=zeile_person["city_of_residence"].capitalize())
-            st.session_state["email"]=st.text_input("Email", value=zeile_person["email"])
-            st.session_state["bed_config"]=st.text_input("Bed Config", value=zeile_person["bed_config"])
+            st.session_state["city_of_residence"]=st.text_input("City of residence", value=zeile_person["city_of_residence"].capitalize(),max_chars=255)
+            st.session_state["email"]=st.text_input("Email", value=zeile_person["email"],max_chars=255)
             st.button("Update Guest",on_click=updatePerson)

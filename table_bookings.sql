@@ -19,6 +19,7 @@ CREATE TABLE bookings(
     total_received FLOAT(24) ,
     cancelled BOOL,
     date_of_cancel DATE,
+    bed_config TINYTEXT,
     guest INT,
     PRIMARY KEY(booking_number),
     FOREIGN KEY (guest) REFERENCES guests(person_ID)
