@@ -149,7 +149,7 @@ with tab1:
             st.session_state["pets"] = st.number_input("Number of pets", value=zeile["pets"])
             st.session_state["number_of_nights"] = st.number_input("Number of nights", value=zeile["number_of_nights"])
             st.session_state["cleaning_fee"]= st.number_input("Cleaning Fee", value=zeile["cleaning_fee"],format="%.01f")
-            st.session_state["total_nights_excl_discount"]=st.text_input("Prices per night excluding discount", value=zeile["total_nights_excl_discount"])
+            st.session_state["total_nights_excl_discount"]=st.text_area("Prices per night excluding discount", value=zeile["total_nights_excl_discount"])
             st.session_state["total_received"]=st.number_input("Total money received", value=zeile["total_received"],format="%.01f")
 
         with col3:

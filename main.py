@@ -10,7 +10,7 @@ newbooking = st.Page(
     title="Manage Bookings",
     url_path="manage_bookings")
 visualize=st.Page(
-    "pages/4_Visualize.py",
+    "pages/5_Visualize.py",
     url_path="visualize"
 )
 update=st.Page(
@@ -18,5 +18,11 @@ update=st.Page(
     title="Update Bookings/Persons",
     url_path="update"
 )
-navigation = st.navigation([homepage,newbooking,update,visualize])
+showBooking=st.Page(
+    "pages/4_show_booking.py",
+    title="Show a Booking",
+    url_path="show_booking"
+
+)
+navigation = st.navigation([homepage,newbooking,update,showBooking,visualize])
 navigation.run()

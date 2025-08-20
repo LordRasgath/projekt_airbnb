@@ -315,6 +315,7 @@ with tab1:
                     checkout_str = checkout_match.group(1)
                     check_out = datetime.datetime.strptime(checkout_str, "%a, %b %d, %Y").date()
 
+
                 adults_match = re.search(r"(\d+)\s+adults?", all_text, re.IGNORECASE)
                 adults = int(adults_match.group(1)) if adults_match else 0
 
@@ -402,7 +403,10 @@ with tab1:
 
                 col1, col2, col3 = st.columns(3)
                 rating_match = re.search(r"([0-9.]+)\s+rating", all_text)
-                total_rating = float(rating_match.group(1))
+                if rating_match:
+                    total_rating = float(rating_match.group(1))
+                else:
+                    total_rating = None
                 member_since_match = re.search(r"Airbnb in (\d{4})", all_text)
                 member_since = member_since_match.group(1) if member_since_match else ""
                 location_line_match = re.search(r"Lives in\s+(.+?)(?:,\s*(.+))?$", all_text, re.MULTILINE)
