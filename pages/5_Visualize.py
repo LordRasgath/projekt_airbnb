@@ -14,9 +14,9 @@ with tab1:
     db=connect()
     cursor=db.cursor()
     cursor.execute("""
-    SELECT  MONTH(check_in) AS month_num, MONTHNAME(check_in) AS month, SUM(total_received) AS sum
-    FROM bookings 
-    WHERE YEAR(check_in)=%s 
+    SELECT  MONTH(date) AS month_num, MONTHNAME(date) AS month, SUM(total_revenue) AS sum
+    FROM night_booked 
+    WHERE YEAR(date)=%s 
     GROUP BY  month;"""
     ,(st.session_state["year"],))
     data=cursor.fetchall()
@@ -37,9 +37,9 @@ with tab2:
     st.session_state["year_quarter"] = st.selectbox("Select Year", list_years)
     st.divider()
     cursor.execute("""
-    SELECT QUARTER(check_in) AS quarter, SUM(total_received) AS sum
-    FROM bookings 
-    WHERE YEAR(check_in)=%s 
+    SELECT QUARTER(date) AS quarter, SUM(total_revenue) AS sum
+    FROM night_booked 
+    WHERE YEAR(date)=%s 
     GROUP BY quarter
     ORDER BY quarter;
     """,(st.session_state["year_quarter"],))
@@ -50,8 +50,8 @@ with tab2:
 
 with tab3:
     cursor.execute("""
-    SELECT YEAR(check_in) AS year, SUM(total_received) AS sum
-    FROM bookings
+    SELECT YEAR(date) AS year, SUM(total_revenue) AS sum
+    FROM night_booked
     GROUP BY year
     ORDER BY year;
     """)

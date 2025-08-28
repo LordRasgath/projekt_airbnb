@@ -1,9 +1,9 @@
 import streamlit as st
-
+# Key file, this file specifies all pages and links to them
 homepage=st.Page(
-    "pages/1_homepage.py",
-    title="Homepage",
-    url_path="homepage"
+    "pages/1_homepage.py", #file path
+    title="Homepage", #Title, relevant for example for the sidebar
+    url_path="homepage" #name that displays in the browser URL
 )
 newbooking = st.Page(
     "pages/2_manage_bookings.py",
@@ -24,5 +24,5 @@ showBooking=st.Page(
     url_path="show_booking"
 
 )
-navigation = st.navigation([homepage,newbooking,update,showBooking,visualize])
+navigation = st.navigation([homepage,newbooking,update,showBooking,visualize]) #Adds an automatic sidebar
 navigation.run()

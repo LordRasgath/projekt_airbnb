@@ -41,16 +41,15 @@ if "data" in st.session_state:
     data = st.session_state["data"]
 
     def showTotalNight():
-        data = st.session_state["data"]
 
-        nights=[x.strip() for x in data["total_nights_excl_discount"].split(',')]
-        nights_date=[]
-        for x in range(data["number_of_nights"]):
-            date=data["check_in"]+datetime.timedelta(days=x)
-            total_night=str(date)+": "+str(nights[x])
-            nights_date.append(total_night)
-        for x in range(len(nights_date)):
-            st.write(nights_date[x])
+        db=connect()
+        cursor = db.cursor(dictionary=True)
+        cursor.execute("SELECT date, total_price_excl_discount FROM night_booked WHERE booking_number=%s",(
+            st.session_state["booking_number"],
+        ))
+        price_per_night=cursor.fetchall()
+        db.commit()
+        st.write(price_per_night)
 
 
 
@@ -73,9 +72,9 @@ if "data" in st.session_state:
         st.write("Cleaning fee: "+str(data["cleaning_fee"]))
         st.write("Service fee for guests: "+str(data["service_fee_guest"]))
         st.write("Total paid: "+str(data["total_paid"]))
-        if data["total_nights_excl_discount"]:
-            st.write("Total per night excluding discounts: ")
-            showTotalNight()
+
+        st.write("Total per night excluding discounts: ")
+        showTotalNight()
         st.write("Total discount: "+str(data["total_discount"]))
         st.write("Service fee for landlord: "+str(data["service_fee_landlord"]))
         st.write("Total received: "+str(data["total_received"]))

@@ -6,7 +6,7 @@ tab1,tab2 = st.tabs(["Update a Booking","Update a Person"])
 currentDateTime = datetime.datetime.now()
 year = currentDateTime.date().year
 list_years = list(
-        range(2008, year + 1))  # for AirBNB Member since: Ability to select the Year from 2008 until the current
+        range(2008, year + 1))
 list_countries = list(
         ['', 'Afghanistan', 'Aland Islands', 'Albania', 'Algeria', 'American Samoa', 'Andorra', 'Angola', 'Anguilla',
          'Antarctica', 'Antigua and Barbuda', 'Argentina', 'Armenia', 'Aruba', 'Australia', 'Austria', 'Azerbaijan',
@@ -113,7 +113,7 @@ def updatePerson():
 
     st.success("Sucessfully updated guest")
 with tab1:
-    # Erste Zeile: Booking Number + Button
+
     col1, col2 = st.columns([2, 1])
     with col1:
         booking_number = st.text_input("Booking Number", key="booking_number")
